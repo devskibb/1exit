@@ -32,18 +32,36 @@ app.get('/health', (req, res) => {
 
 // Main handler for all routes
 app.get('*', async (req, res) => {
-    try {
-        const pathParts = req.path.split('/').filter(part => part);
-        if (pathParts.length < 1) {
-            return res.status(400).send('Invalid URL format');
+    const host = req.headers.host || '';
+    console.log('Incoming host:', host);
+
+    const pathParts = req.path.split('/').filter(part => part);
+    if (pathParts.length < 1) {
+        return res.status(400).send('Invalid URL format');
+    }
+
+    let originalUrl;
+    let siteName;
+
+    // Handle Medium URLs
+    if (host.includes('medium')) {
+        siteName = 'medium';Y
+        originalUrl = `https://medium.com/${pathParts.join('/')}`;
+        console.log('Fetching Medium article:', originalUrl);
+    } else {
+        // Regular news site handling
+        const domainMatch = host.match(/^(?:[\w-]+\.)?(\w+)\.xyz/);
+        if (!domainMatch) {
+            return res.status(400).send('Invalid domain format');
         }
+        siteName = domainMatch[1];
+        const remainingPath = '/' + pathParts.join('/');
+        originalUrl = `https://www.${siteName}.com${remainingPath}`;
+    }
 
-        const siteName = pathParts[0];
-        const remainingPath = '/' + pathParts.slice(1).join('/');
-        const originalUrl = `https://www.${siteName}.com${remainingPath}`;
+    console.log('Attempting to fetch:', originalUrl);
 
-        console.log('Attempting to fetch:', originalUrl);
-
+    try {
         // Customize headers based on the site
         let headers = {
             'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
