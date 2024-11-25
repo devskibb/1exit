@@ -33,10 +33,15 @@ app.get('/health', (req, res) => {
 // Main handler for all routes
 app.get('*', async (req, res) => {
     try {
-        // Extract subdomain and reconstruct the original URL
-        const subdomain = req.subdomain;
-        const path = req.url;
-        const originalUrl = `https://www.${subdomain}.com${path}`;
+        // Extract the first part of the path as the site name
+        const pathParts = req.path.split('/').filter(part => part);
+        if (pathParts.length < 1) {
+            return res.status(400).send('Invalid URL format');
+        }
+
+        const siteName = pathParts[0];  // e.g., 'nytimes'
+        const remainingPath = '/' + pathParts.slice(1).join('/');  // rest of the path
+        const originalUrl = `https://www.${siteName}.com${remainingPath}`;
 
         console.log('Attempting to fetch:', originalUrl);
         console.log('Headers:', req.headers);
