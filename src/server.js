@@ -3,13 +3,21 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 // Middleware to parse request headers
 app.use((req, res, next) => {
     const host = req.headers.host;
-    req.subdomain = host.split('.')[0];
+    const isLocalhost = host.includes('localhost');
+    req.subdomain = isLocalhost ? 
+        host.split('.')[0] : 
+        host.split('.1exit.xyz')[0];
     next();
+});
+
+// Add a simple health check endpoint to prevent spin down
+app.get('/health', (req, res) => {
+    res.send('OK');
 });
 
 // Main handler for all routes
