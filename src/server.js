@@ -7,15 +7,25 @@ const PORT = process.env.PORT || 10000;
 
 // Middleware to parse request headers
 app.use((req, res, next) => {
-    const host = req.headers.host;
-    const isLocalhost = host.includes('localhost');
-    req.subdomain = isLocalhost ? 
-        host.split('.')[0] : 
-        host.split('.1exit.xyz')[0];
+    const host = req.headers.host || '';
+    console.log('Incoming host:', host); // Debug log
+
+    // Extract subdomain more reliably
+    let subdomain;
+    if (host.includes('onrender.com')) {
+        subdomain = host.split('.onrender.com')[0].split('-')[0];
+    } else if (host.includes('1exit.xyz')) {
+        subdomain = host.split('.1exit.xyz')[0];
+    } else if (host.includes('localhost')) {
+        subdomain = host.split('.localhost')[0];
+    }
+
+    console.log('Extracted subdomain:', subdomain); // Debug log
+    req.subdomain = subdomain;
     next();
 });
 
-// Add a simple health check endpoint to prevent spin down
+// Health check endpoint
 app.get('/health', (req, res) => {
     res.send('OK');
 });
@@ -49,7 +59,7 @@ app.get('*', async (req, res) => {
         // Parse HTML with Cheerio
         const $ = cheerio.load(response.data);
 
-        // Remove common paywall elements (customize based on target sites)
+        // Remove common paywall elements
         $('.paywall, .subscription-required, .modal, .fade').remove();
         $('[class*="paywall"], [class*="subscribe"], [id*="paywall"]').remove();
 
@@ -64,6 +74,7 @@ app.get('*', async (req, res) => {
                 <body>
                     <h1>Error</h1>
                     <p>Unable to fetch the requested page. Error: ${error.message}</p>
+                    <p>Attempted URL: ${req.headers.host}${req.url}</p>
                 </body>
             </html>
         `);

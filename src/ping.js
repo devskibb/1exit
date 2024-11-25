@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const RENDER_URL = 'https://oneexit.onrender.com/health';
+const RENDER_URL = 'https://oneexit.onrender.com/health';""
 
 // Ping every 14 minutes
 setInterval(async () => {
@@ -10,4 +10,4 @@ setInterval(async () => {
     } catch (error) {
         console.error('Ping failed:', error.message);
     }
-}, 14 * 60 * 1000); 
+}, 14 * 60 * 1000);``
