@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const RENDER_URL = 'https://1exit.onrender.com/health';
+const RENDER_URL = 'https://oneexit.onrender.com/health';
 
 // Ping every 14 minutes
 setInterval(async () => {
